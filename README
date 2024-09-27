@@ -1,27 +1,22 @@
-Initialize Project
+# Popularity and Attendance of Aquatics Recreation Courses
+
+## Overview
+
+This repo provides the necessary tool to reproduce the findigs of the paper, as well as a bibliography. 
 
 
-Some notes: Have the ability to sort courses by course name, 
-program (cardio-adult, adult swim) which is often same as course name, section
-which refers to (fitness, aquatic, general interest etc.) as well as subsection
-(adult, child/youth, etc) and also course type (regular or drop-in)
+## File Structure
 
-Then we can sort courses by individual faciltiies within a location, 
-and sort facilities by type (room, pool-A, gym etc.), and we can sort locations
-by district and by ward.
+The repo is structured as:
 
-We can look at number of participants registered, the number that show up over the 
-duration with visits, number of sessions by looking at days of the week and number 
-of weeks, as well as min and max amount registered. We can also see demand by 
-looking at waitlist size
+-   `data/raw_data` contains the raw data as obtained from X.
+-   `data/analysis_data` contains the cleaned dataset that was constructed.
+-   `model` contains fitted models. 
+-   `other` contains relevant literature, details about LLM chat interactions, and sketches.
+-   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
+-   `scripts` contains the R scripts used to simulate, download and clean data.
 
-With this understanding, what can we do?
 
-I am in aquatics, so I am interested in looking at aquatics courses. Can make a 
-bar plot of aquatics courses by ward or district, to see which were most offered. 
-(Wards/districts/locations would be colours). Then for those courses we can see 
-popular they were by plotting #registered vs visits/#weeks. We can also look at 
-#instances of a coursevvs waitlist size or #num_reg+waitlist or something like 
-that. We can seperate all of these by ward, district or location.
+## Statement on LLM usage
 
-#reg vs mean visits/#weeks by district will be our project
+Aspects of the code were written with the help of the LLM ChatGPT 3.5 The entire chat history is available in inputs/llms/usage.txt.

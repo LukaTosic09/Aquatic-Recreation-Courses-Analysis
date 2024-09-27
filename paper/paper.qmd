@@ -1,0 +1,134 @@
+---
+title: "Popularity and Attendance of Aquatics Recreation Courses"
+author: 
+      -Luka Tosic
+thanks: "Code and data are available at: https://github.com/LukaTosic09/Recreation_Programs_EDA"
+date: 2024-09-26
+date-format: long
+abstract: "This paper analyzes the relationship between course size and attendance for aquatic courses offered by the City of Toronto's Parks Forestry and Recreation (PFR) commission. The top finding shows that student attendance is highest in _____ courses. Third sentence. Further analysis would look at where courses have higher or lower engagement, and would look at when attendance begins to drop across cours."
+format: pdf
+number-sections: true
+bibliography: references.bib
+---
+
+```{r}
+#init chunk
+#| include: false
+#| warning: false
+#| message: false
+#| echo: false
+
+library(tidyverse)
+library(dplyr)
+library(knitr)
+
+data <- read.csv("../data/raw_data/unedited_data.csv")
+```
+
+# Introduction
+
+For the City of Toronto's Parks Forestry and Recreation (PFR) Commission's swim instructors and for patrons, course sizes are a constant point of debate. I am a swim instructor for PFR and I am interested in analyzing the popularity and student retention across different courses; as well as analyzing course availability and popularity across the city.
+
+# Data
+
+The data is taken from (opendatatoronto), it is the Recreational Courses Historical Data dataset. It was cleaned using BaseR, (dplyr) and (tidyverse) packages and visualizations are done with (ggplot).
+
+Relevant features of the data include categorization by ward and district, classification as drop in or sign up (regular), number of participants registered, the number of classes, the number of participants registered and the number of total visits to a course.
+
+We can't see attendance for each class, but we have the total attendance given by Visits, and the Number_of_Classes to give us a mean visits per week. We can plot the number of students registered vs mean visits over a session. Since the number of students attending each class can't exceed the number registered, if we make a scatter plot and fit a linear model using ggplot, we can expect a slope of at most 1.
+
+
+```{r}
+#| echo: false
+
+aquatics_data <- data %>%
+  filter(Course_Type == "Regular", Section == "Swimming") 
+
+course_data <- aquatics_data %>%
+  group_by(Course) %>%
+  summarise(Count = n(), .groups = "drop") |>
+   filter(Count>100) 
+
+course_data |>
+  ggplot(aes(x=Course, y=Count)) + geom_bar(stat = "identity") +
+  labs(
+    title = "Count of Total Aquatics Courses",
+    x = "Courses",
+    y = "Count"
+  ) + 
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+```
+\newpage
+
+Tiny Tots Swim is by far the most offered in the city, this makes sense as the classes are only 15 minutes as opposed to all other classes which are 30 minutes or longer, so more can be offered in a single day; moreover, Tiny Tots can be run at any pool including wading pools which increases the number of facilities that can host it. We can also see that the small group ultra 1-9 swims are offered anywhere from twice to five times less often than their regular counterparts. The tri private swims are 3-student courses offered most commonly at Douglas Snow Aquatic Centre and Matty Eckler Recreation Centre, both in the North District of the city.
+
+```{r}
+#| echo: false
+
+grouped_data <- aquatics_data %>%
+  group_by(Course, Facility_District) %>%  # Group by Course and Facility_District
+  summarise(Count = n(), .groups = "drop") |>
+   filter(Count>100)
+
+grouped_data |>
+   ggplot(aes(x = Course, y=Count, fill = Facility_District)) +
+   geom_bar(stat = "identity") +  
+   labs(
+     title = "Number of Courses by Facility District",
+     x = "Courses",
+     y = "Count of Instances"
+   ) +
+   theme_minimal() +
+  theme(
+    axis.text.x = element_blank())
+
+```
+
+# Discussion 
+
+
+```{r}
+#| echo: false
+aquatics_data <- aquatics_data %>%
+  mutate(Response = Visits / Number_of_Classes)  
+
+ggplot(aquatics_data, aes(x = Course_Reg, y = Response, colour = Facility_District)) +
+  geom_point( size = 2) +  
+  geom_smooth(method = "lm", color = "grey", se = FALSE) +  
+  labs(
+    title = "Scatterplot of Students Registered vs Visits per Week",
+    x = "Number Registered",
+    y = "Visits per Week"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+
+ggplot(aquatics_data |> filter(Response <= Course_Reg), aes(x = Course_Reg, y = Response)) +
+  geom_point(color = "black", size = 2) +  
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  
+  labs(
+    title = "Scatterplot of Students Registered vs Visits per Week",
+    x = "Number Registered",
+    y = "Visits per Week"
+  ) +
+  theme_minimal()
+
+glimpse(aquatics_data)
+
+```
+
+# Discussion 
+
+# Weaknesses and Next Steps
+
+This data can only tell us about average attendance as visits gives the sum of all instances of patrons attending a program. To analyze further, we would want to look at when patron attendance drops, and for what courses/programs. Is there a trend in this? To do this, we would need a vector that stores visits by class. As an instructor with the city, I know this is possible as our attendance sheets contain a box for the total number of participants each week; however the data was logged as total participation over all weeks.
+
+Another next step would be further analysis of waitlist sizes for different courses by ward and district to analyze where certain courses are lacking in availability.
